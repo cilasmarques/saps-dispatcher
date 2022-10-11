@@ -20,6 +20,7 @@ public class SubmissionDispatcherMain {
 
     String confPath = args[0];
     String executionTagsFilePath = args[1];
+    String landsatImagesPath = args[2];
 
     if (Objects.isNull(confPath) || confPath.isEmpty()) {
       throw new IllegalArgumentException(
@@ -31,7 +32,13 @@ public class SubmissionDispatcherMain {
           "The path to the execution tags file cannot be null or empty");
     }
 
+    if (Objects.isNull(landsatImagesPath) || landsatImagesPath.isEmpty()) {
+      throw new IllegalArgumentException(
+              "The path to the landsat images file cannot be null or empty");
+    }
+
     System.setProperty(SubmissionDispatcher.EXECUTION_TAGS_FILE_PATH_KEY, executionTagsFilePath);
+    System.setProperty(SubmissionDispatcher.LANDSAT_IMAGES_FILE_PATH_KEY, landsatImagesPath);
 
     final Properties properties = new Properties();
     FileInputStream input = new FileInputStream(confPath);

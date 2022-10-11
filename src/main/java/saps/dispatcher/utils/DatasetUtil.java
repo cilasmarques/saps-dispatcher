@@ -1,18 +1,54 @@
 /* (C)2020 */
 package saps.dispatcher.utils;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import saps.common.utils.SapsPropertiesConstants;
 
 public class DatasetUtil {
 
+  // TODO adicionar documentação
+  public static boolean validateLandsatImage(String imagesFilePath, String lowerLeftLatitude, String lowerLeftLongitude,
+      String upperRightLatitude,
+      String upperRightLongitude, String imageDate, String landsat) throws IOException {
+    Scanner sc = new Scanner(new File(imagesFilePath));
+    sc.useDelimiter(",");
+    sc.nextLine(); // Ignore first line
+
+    while (sc.hasNextLine()) {
+      String[] values = sc.nextLine().split(",");
+
+      String SPACECRAFT_ID = values[2].toLowerCase();
+      String DATE_ACQUIRED = values[4];
+      float NORTH_LAT = Float.parseFloat(values[12]);
+      float SOUTH_LAT = Float.parseFloat(values[13]);
+      float WEST_LON = Float.parseFloat(values[14]);
+      float EAST_LON = Float.parseFloat(values[15]);
+      float latitude = (Float.parseFloat(lowerLeftLatitude) + Float.parseFloat(upperRightLatitude)) / 2;
+      float longitude = (Float.parseFloat(lowerLeftLongitude) + Float.parseFloat(upperRightLongitude)) / 2;
+
+      if (landsat.equals(SPACECRAFT_ID) && imageDate.equals(DATE_ACQUIRED) && // satelite da match # data da match
+          latitude >= SOUTH_LAT && latitude <= NORTH_LAT && // valor maior ou igual que SOUTH_LAT_CSV (baixo) e valor
+                                                            // menor ou igual que NORTH_LAT_CSV (cima)
+          longitude >= WEST_LON && longitude <= EAST_LON // valor maior ou igual que WEST_LON_CSV (esquerda) e valor
+                                                         // menor ou igual que EAST_LON_CSV (direita)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Returns a list of Satellites in operation by a given year.
    *
-   * <p>Note that some Satellites (Landsat7 and Landsat8) are still in operation on this date.
+   * <p>
+   * Note that some Satellites (Landsat7 and Landsat8) are still in operation on
+   * this date.
    *
    * @param year - integer that represents the year.
    * @return - a list of Satellites names in the Saps definition.
@@ -39,8 +75,9 @@ public class DatasetUtil {
    * Returns the most recent Satellite in operation by a given year.
    *
    * @param year - integer that represents the year.
-   * @return - a String with the most recent Satellite in operation by the given year, null in case
-   *     there is no Dataset in operation.
+   * @return - a String with the most recent Satellite in operation by the given
+   *         year, null in case
+   *         there is no Dataset in operation.
    */
   public static String getMostRecentDataSetInOperation(int year) {
     List<String> datasets = getSatsInOperationByYear(year);
