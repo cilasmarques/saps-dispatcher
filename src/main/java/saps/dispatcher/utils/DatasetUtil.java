@@ -1,6 +1,7 @@
 /* (C)2020 */
 package saps.dispatcher.utils;
 
+import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,31 +13,23 @@ import saps.common.utils.SapsPropertiesConstants;
 public class DatasetUtil {
 
   // TODO adicionar documentação
-  public static boolean validateLandsatImage(String imagesFilePath, String lowerLeftLatitude, String lowerLeftLongitude,
-      String upperRightLatitude,
-      String upperRightLongitude, String imageDate, String landsat) throws IOException {
+  public static boolean validateLandsatImage(String imagesFilePath, String region, String fullDate, String landsat) throws IOException {
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    String imageDate = format.format(fullDate);
+
+
     Scanner sc = new Scanner(new File(imagesFilePath));
     sc.useDelimiter(",");
     sc.nextLine(); // Ignore first line
 
     while (sc.hasNextLine()) {
       String[] values = sc.nextLine().split(",");
-
+      
+      String REGION_ID = values[1].split("_")[2];
       String SPACECRAFT_ID = values[2].toLowerCase();
       String DATE_ACQUIRED = values[4];
-      float NORTH_LAT = Float.parseFloat(values[12]);
-      float SOUTH_LAT = Float.parseFloat(values[13]);
-      float WEST_LON = Float.parseFloat(values[14]);
-      float EAST_LON = Float.parseFloat(values[15]);
-      float latitude = (Float.parseFloat(lowerLeftLatitude) + Float.parseFloat(upperRightLatitude)) / 2;
-      float longitude = (Float.parseFloat(lowerLeftLongitude) + Float.parseFloat(upperRightLongitude)) / 2;
 
-      if (landsat.equals(SPACECRAFT_ID) && imageDate.equals(DATE_ACQUIRED) && // satelite da match # data da match
-          latitude >= SOUTH_LAT && latitude <= NORTH_LAT && // valor maior ou igual que SOUTH_LAT_CSV (baixo) e valor
-                                                            // menor ou igual que NORTH_LAT_CSV (cima)
-          longitude >= WEST_LON && longitude <= EAST_LON // valor maior ou igual que WEST_LON_CSV (esquerda) e valor
-                                                         // menor ou igual que EAST_LON_CSV (direita)
-      ) {
+      if (region.equals(REGION_ID) && landsat.equals(SPACECRAFT_ID) && imageDate.equals(DATE_ACQUIRED)) {
         return true;
       }
     }

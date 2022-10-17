@@ -1,7 +1,6 @@
 /* (C)2020 */
 package saps.dispatcher.core;
 
-import java.text.SimpleDateFormat;
 import java.sql.SQLException;
 import java.util.*;
 import org.apache.log4j.Logger;
@@ -272,19 +271,12 @@ public class SubmissionDispatcher {
       for (String dataset : datasets) {
         LOGGER.debug("Adding new tasks with dataset " + dataset);
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        String imageDate = format.format(cal.getTime());
+        for (String region : regions) {
+          String taskId = UUID.randomUUID().toString();
+          String fullDate = cal.getTime().toString();
+          boolean imageIsValid = DatasetUtil.validateLandsatImage(imagesFilePath, region, fullDate, dataset);
 
-        boolean imageIsValid = DatasetUtil.validateLandsatImage(imagesFilePath, lowerLeftLatitude, lowerLeftLongitude,
-            upperRightLatitude, upperRightLongitude, imageDate, dataset);
-        LOGGER.debug("imageIsValid =====");
-        LOGGER.debug(imageIsValid);
-        LOGGER.debug("imageIsValid =====");
-
-        if (imageIsValid) {
-          for (String region : regions) {
-            String taskId = UUID.randomUUID().toString();
-
+          if (imageIsValid) {
             SapsImage task = addTask(
                 taskId,
                 dataset,
@@ -305,6 +297,7 @@ public class SubmissionDispatcher {
       }
       cal.add(Calendar.DAY_OF_YEAR, 1);
     }
+
     return taskIds;
   }
 
